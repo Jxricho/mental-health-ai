@@ -145,6 +145,7 @@ def clear_chat_session(key: str):
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = FastAPI()
 
+BASE_DIR = Path(__file__).resolve().parent
 # *** จุดที่แก้: ใช้ str(BASE_DIR / "...") เพื่อระบุตำแหน่งที่แน่นอน ***
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -429,7 +430,6 @@ def sanitize(text: str) -> str:
 # ======================================================
 # ROUTES — pages
 # ======================================================
-BASE_DIR = Path(__file__).resolve().parent
 @app.get("/")
 async def root():
     return RedirectResponse("/intro")
