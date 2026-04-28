@@ -9,7 +9,7 @@ from pathlib import Path
 import os, json, sqlite3, bcrypt
 
 load_dotenv()
-DB_PATH = "users.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -429,6 +429,7 @@ def sanitize(text: str) -> str:
 # ======================================================
 # ROUTES — pages
 # ======================================================
+BASE_DIR = Path(__file__).resolve().parent
 @app.get("/")
 async def root():
     return RedirectResponse("/intro")
