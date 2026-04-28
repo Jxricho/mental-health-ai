@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผลการประเมิน</title>
+<style>
+body {
+    margin: 0;
+    font-family: "Prompt", system-ui, sans-serif;
+    background: linear-gradient(#b9ecff, #e8fbff);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+.ocean {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: url("https://i.pinimg.com/736x/2e/40/dc/2e40dc63dacbb648982ddc2589a76356.jpg") center / cover no-repeat;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.bubble-bg {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.8);
+    background: rgba(255,255,255,.3);
+    animation: bubble 8s infinite ease-in;
+}
+
+@keyframes bubble {
+    from { transform: translateY(100vh) scale(.5); opacity: .7; }
+    to   { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+}
+
+/* ========= LAYOUT ========= */
+.page {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 30px 16px 60px;
+    box-sizing: border-box;
+}
+
+.col {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ========= CARD BASE ========= */
+.card {
+    border-radius: 22px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 20px 50px rgba(0,0,0,.18);
+    padding: 26px 28px;
+    text-align: center;
+}
+
+/* ========= SCORE CARD ========= */
+.level-tag {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.score-num {
+    font-size: 80px;
+    font-weight: 900;
+    color: #00a3c8;
+    line-height: 1;
+    margin: 6px 0;
+}
+
+.form-name {
+    font-size: 20px;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.desc {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ========= CONTACT CARD ========= */
+.contact-card {
+    text-align: left;
+}
+
+.contact-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0096dc;
+    margin-bottom: 12px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e8f8ff;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.contact-text strong {
+    display: block;
+    font-size: 14px;
+    color: #222;
+}
+
+.contact-text span {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* ========= BUTTON ========= */
+.btn {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 13px 28px;
+    font-size: 16px;
+    border-radius: 40px;
+    border: none;
+    background: #0096dc;
+    color: white;
+    cursor: pointer;
+    transition: .25s;
+    font-family: inherit;
+    width: 100%;
+}
+
+.btn:hover { transform: scale(1.03); }
+
+/* Jellyfish */
+.jellyfish {
+    position: fixed;
+    right: 24px;
+    bottom: 20px;
+    width: 100px;
+    animation: jelly-bounce 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes jelly-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-18px); }
+}
+</style>
+</head>
+
+<body>
+<div class="ocean" id="ocean"></div>
+
+<div class="page">
+<div class="col">
+
+    <!-- SCORE CARD -->
+    <div class="card" id="scoreCard">
+        <div id="levelTag" class="level-tag">กำลังโหลด...</div>
+        <div class="score-num" id="score">--</div>
+        <div class="form-name" id="formName">กำลังดึงข้อมูล</div>
+        <div class="desc" id="message">กรุณารอสักครู่ ระบบกำลังประมวลผล 😊</div>
+    </div>
+
+<!-- CONTACT / RESOURCES -->
+    <div class="card contact-card" id="contactCard" style="display:none">
+        <div class="contact-title" id="contactTitle">📞 ช่องทางที่สามารถติดต่อได้</div>
+        <div id="contactList"></div>
+    </div>
+
+    <!-- BUTTON -->
+    <button class="btn" onclick="window.location.href='/index'">🔙 กลับไปเลือกแบบทดสอบ</button>
+
+</div>
+</div>
+
+<img class="jellyfish" src="/static/jellyfish.png">
+
+<script>
+// --- bubbles ---
+for (let i = 0; i < 20; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble-bg";
+    b.style.left = Math.random() * 100 + "vw";
+    b.style.animationDuration = (5 + Math.random() * 6) + "s";
+    const size = 12 + Math.random() * 35;
+    b.style.width = b.style.height = size + "px";
+    document.getElementById("ocean").appendChild(b);
+}
+
+// --- contact resources by level ---
+const CONTACTS = {
+    LOW: [
+        { icon: "💬", name: "พูดคุยกับคนที่ไว้ใจ", detail: "เพื่อน ครอบครัว หรือคนใกล้ชิดที่รับฟังได้" },
+        { icon: "🧘", name: "ดูแลตัวเองในแต่ละวัน", detail: "นอนหลับให้พอ ออกกำลังกาย ทำกิจกรรมที่ชอบ" }
+    ],
+    MILD: [
+        { icon: "💬", name: "พูดคุยกับคนที่ไว้ใจ", detail: "เพื่อน ครอบครัว หรือคนใกล้ชิดที่รับฟังได้" },
+        { icon: "📞", name: "สายด่วนสุขภาพจิต 1323", detail: "กรมสุขภาพจิต โทรฟรีตลอด 24 ชั่วโมง" },
+        { icon: "🏥", name: "พบนักจิตวิทยาหรือนักสังคมสงเคราะห์", detail: "ที่โรงพยาบาลใกล้บ้านหรือคลินิกสุขภาพจิต" }
+    ],
+    MEDIUM: [
+        { icon: "📞", name: "สายด่วนสุขภาพจิต 1323", detail: "กรมสุขภาพจิต โทรฟรีตลอด 24 ชั่วโมง" },
+        { icon: "🏥", name: "พบแพทย์หรือนักจิตวิทยา", detail: "ควรนัดหมายโดยเร็ว แพทย์จะช่วยประเมินและวางแผนดูแล" },
+        { icon: "👨‍👩‍👧", name: "แจ้งผู้ปกครองหรือผู้ดูแล", detail: "ให้คนใกล้ชิดรับรู้และช่วยดูแลคุณ" }
+    ],
+    MODERATE: [
+        { icon: "📞", name: "สายด่วนสุขภาพจิต 1323", detail: "กรมสุขภาพจิต โทรฟรีตลอด 24 ชั่วโมง" },
+        { icon: "🏥", name: "พบแพทย์หรือนักจิตวิทยาโดยเร็ว", detail: "อย่าปล่อยไว้นาน การดูแลแต่เนิ่นๆ ช่วยได้มาก" },
+        { icon: "👨‍👩‍👧", name: "แจ้งผู้ปกครองหรือผู้ดูแล", detail: "ให้คนที่คุณไว้ใจรู้ว่าคุณรู้สึกยังไง" }
+    ],
+    MODERATE_HIGH: [
+        { icon: "📞", name: "สายด่วนสุขภาพจิต 1323", detail: "กรมสุขภาพจิต โทรฟรีตลอด 24 ชั่วโมง" },
+        { icon: "🚨", name: "พบแพทย์โดยเร่งด่วน", detail: "ควรไปพบแพทย์ที่โรงพยาบาลใกล้บ้านในวันนี้หรือพรุ่งนี้" },
+        { icon: "👨‍👩‍👧", name: "แจ้งผู้ปกครองหรือผู้ดูแลทันที", detail: "คุณไม่ต้องผ่านสิ่งนี้คนเดียว ให้คนใกล้ชิดช่วยพาไปพบแพทย์" },
+        { icon: "🆘", name: "กรณีฉุกเฉิน โทร 1669 หรือ 191", detail: "ถ้ารู้สึกไม่ปลอดภัย โทรได้เลยทันที" }
+    ],
+    HIGH: [
+        { icon: "🆘", name: "โทร 1669 หรือ 191 ทันที", detail: "ถ้ารู้สึกไม่ปลอดภัยหรืออยากทำร้ายตัวเอง โทรได้เลย" },
+        { icon: "📞", name: "สายด่วนสุขภาพจิต 1323", detail: "กรมสุขภาพจิต โทรฟรีตลอด 24 ชั่วโมง" },
+        { icon: "🏥", name: "ไปห้องฉุกเฉินโรงพยาบาลใกล้บ้านได้เลย", detail: "แจ้งว่าต้องการพบจิตแพทย์โดยด่วน" },
+        { icon: "👨‍👩‍👧", name: "บอกผู้ปกครองหรือคนใกล้ชิดทันที", detail: "คุณไม่ต้องเผชิญสิ่งนี้คนเดียว ขอความช่วยเหลือได้เสมอ" }
+    ]
+};
+
+const LEVEL_TH = {
+    LOW: "อยู่ในระดับปกติ",
+    MILD: "เล็กน้อย",
+    MEDIUM: "ปานกลาง",
+    MODERATE: "ปานกลาง",
+    MODERATE_HIGH: "ค่อนข้างสูง",
+    HIGH: "สูง — ควรได้รับความช่วยเหลือ"
+};
+
+const LEVEL_COLOR = {
+    LOW: "#98f7ff",
+    MILD: "#b2edff",
+    MEDIUM: "#7cd9ff",
+    MODERATE: "#7cd9ff",
+    MODERATE_HIGH: "#5bc9ff",
+    HIGH: "#3ab8ff"
+};
+
+const LEVEL_MSG = {
+    LOW: "ดูเหมือนคุณยังอยู่ในช่วงที่รับมือได้ดีนะครับ ถ้ามีอะไรอยากเล่าเพิ่มเติมก็มาคุยได้เสมอ 😊",
+    MILD: "ขอบคุณที่เล่าให้ฟังนะครับ สิ่งที่คุณรู้สึกอยู่นั้นมีคุณค่า และการดูแลตัวเองแต่เนิ่นๆ ช่วยได้มาก 💙",
+    MEDIUM: "สิ่งที่คุณเผชิญอยู่ไม่ง่ายเลย ถ้ามีโอกาสลองพูดคุยกับคนที่ไว้ใจหรือผู้เชี่ยวชาญดูนะครับ มีคนพร้อมช่วย 💙",
+    MODERATE: "สิ่งที่คุณเผชิญอยู่ไม่ง่ายเลย ถ้ามีโอกาสลองพูดคุยกับคนที่ไว้ใจหรือผู้เชี่ยวชาญดูนะครับ มีคนพร้อมช่วย 💙",
+    MODERATE_HIGH: "ขอบคุณที่กล้าเล่าให้ฟังนะครับ ผลที่ออกมาบอกว่าคุณควรได้รับการดูแลเพิ่มเติม ลองให้คนใกล้ชิดหรือผู้เชี่ยวชาญช่วยดูนะครับ 💙",
+    HIGH: "ขอบคุณที่ไว้ใจเล่าให้ฟังนะครับ ผลนี้บอกว่าคุณควรได้รับความช่วยเหลือโดยเร็ว คุณไม่ต้องผ่านสิ่งนี้คนเดียว มีคนพร้อมอยู่เคียงข้างเสมอ 💙"
+};
+
+fetch("/assessment/result")
+    .then(r => r.json())
+    .then(data => {
+        const score = data.score ?? "--";
+        const form  = data.form  ?? "Unknown";
+        const level = data.level ?? "LOW";
+        const itemScores   = data.item_scores   ?? {};
+        const formQuestions = data.form_questions ?? [];
+
+        // Score card
+        document.getElementById("score").textContent = score;
+        document.getElementById("formName").textContent = "ผลจากแบบประเมิน " + form;
+
+        const tag = document.getElementById("levelTag");
+        tag.textContent = LEVEL_TH[level] || level;
+        tag.style.background = LEVEL_COLOR[level] || "#98f7ff";
+
+        document.getElementById("message").textContent = LEVEL_MSG[level] || "";
+
+// Contact resources
+        const contacts = CONTACTS[level] || CONTACTS["MILD"];
+        const contactCard = document.getElementById("contactCard");
+        contactCard.style.display = "block";
+
+        if (level === "HIGH" || level === "MODERATE_HIGH") {
+            document.getElementById("contactTitle").textContent = "🚨 ช่องทางขอความช่วยเหลือ";
+        } else {
+            document.getElementById("contactTitle").textContent = "📞 ช่องทางที่สามารถติดต่อได้";
+        }
+
+        const cl = document.getElementById("contactList");
+        cl.innerHTML = contacts.map(c => `
+            <div class="contact-item">
+                <div class="contact-icon">${c.icon}</div>
+                <div class="contact-text">
+                    <strong>${c.name}</strong>
+                    <span>${c.detail}</span>
+                </div>
+            </div>
+        `).join("");
+    })
+    .catch(() => {
+        document.getElementById("message").textContent = "ดึงข้อมูลไม่สำเร็จ ลองใหม่อีกครั้งนะ";
+    });
+</script>
+
+</body>
+</html>

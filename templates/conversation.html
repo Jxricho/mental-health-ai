@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>พื้นที่พูดคุย</title>
+
+<style>
+:root{
+  --bubble-bot:#ffffff;
+  --bubble-user:#e7f0ff;
+  --text:#1b1b1b;
+}
+
+html,body{
+  margin:0;
+  height:100%;
+  font-family:"Inter","Segoe UI",sans-serif;
+  overflow:hidden;
+  transition:background .8s ease;
+}
+
+.page{
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:16px;
+  padding:0 16px;
+  box-sizing:border-box;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  min-width:240px;
+  height:85vh;
+  background:#ffffffcc;
+  backdrop-filter:blur(10px);
+  border-radius:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.15);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  animation:fade .5s ease;
+}
+.sidebar-header{
+  padding:20px 18px 12px;
+  font-size:13px;
+  font-weight:800;
+  color:#1b2a6b;
+  letter-spacing:.5px;
+  border-bottom:1px solid #eef0ff;
+}
+.sidebar-header span{ color:#9aaad8; font-weight:400; font-size:11px; margin-left:6px;}
+.sidebar-list{
+  flex:1;
+  overflow-y:auto;
+  padding:10px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sidebar-list::-webkit-scrollbar{ width:4px; }
+.sidebar-list::-webkit-scrollbar-thumb{ background:#d0d8f0; border-radius:999px; }
+.session-item{
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:background .15s;
+  border:1.5px solid transparent;
+}
+.session-item:hover{ background:#f0f4ff; }
+.session-item.active{ background:#e8eeff; border-color:#c0caff; }
+.session-form{
+  font-size:11px;
+  font-weight:700;
+  color:#6b80d8;
+  margin-bottom:3px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.session-form .badge{
+  font-size:10px;
+  background:#eef2ff;
+  color:#7a8fd8;
+  padding:1px 7px;
+  border-radius:999px;
+}
+.session-form .badge.done{
+  background:#e6f9f0;
+  color:#3daa6e;
+}
+.session-preview{
+  font-size:12px;
+  color:#777;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.4;
+}
+.session-date{
+  font-size:10px;
+  color:#bbb;
+  margin-top:3px;
+}
+.sidebar-new{
+  margin:10px;
+  padding:10px;
+  border-radius:14px;
+  border:1.5px dashed #c0caff;
+  text-align:center;
+  font-size:13px;
+  color:#7a8fd8;
+  cursor:pointer;
+  transition:background .15s;
+}
+.sidebar-new:hover{ background:#f0f4ff; }
+.sidebar-empty{
+  text-align:center;
+  padding:30px 16px;
+  font-size:12px;
+  color:#bbb;
+  line-height:1.8;
+}
+
+.app{
+  flex:1;
+  max-width:820px;
+  height:85vh;
+  background:#ffffffdd;
+  backdrop-filter:blur(7px);
+  border-radius:34px;
+  box-shadow:0 50px 120px rgba(0,0,0,.25);
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  animation:fade .5s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* HEADER */
+.header{
+  padding:22px 24px 42px;
+  border-radius:26px 26px 12px 12px;
+  background:linear-gradient(135deg,#bed5ff,#e7f0ff,#ffffff);
+  background-size:250% 250%;
+  animation:headerMove 8s ease-in-out infinite;
+  position:relative;
+  z-index:5;
+  transition:background .8s ease;
+}
+
+@keyframes headerMove{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+.header h1{
+  margin:0;
+  font-size:24px;
+  font-weight:900;
+  color:#1b2a6b;
+}
+
+.header p{
+  margin-top:6px;
+  font-size:14px;
+  color:#6b7393;
+}
+
+/* THEME BUTTON */
+.theme-btn{
+  position:absolute;
+  right:20px;
+  top:18px;
+  background:white;
+  padding:8px 14px;
+  border-radius:18px;
+  box-shadow:0 18px 35px rgba(0,0,0,.22);
+  cursor:pointer;
+  font-size:14px;
+}
+
+.theme-panel{
+  position:absolute;
+  right:20px;
+  top:70px;
+  padding:12px;
+  background:white;
+  border-radius:18px;
+  display:none;
+  box-shadow:0 22px 45px rgba(0,0,0,.25);
+  z-index:9999;
+}
+
+.theme-option{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:inline-block;
+  margin:6px;
+  cursor:pointer;
+  border:2px solid white;
+  box-shadow:0 10px 20px rgba(0,0,0,.2);
+}
+
+/* CHAT */
+.chat{
+  flex:1;
+  margin-top:-20px;
+  padding:22px;
+  overflow-y:auto;
+  border-radius:24px;
+  background:linear-gradient(180deg,#ffffff,#f8faff);
+  position:relative;
+}
+
+.message-row{
+  display:flex;
+  margin-bottom:16px;
+  animation:pop .35s ease;
+}
+
+.message-row.user{
+  justify-content:flex-end;
+}
+
+@keyframes pop{
+  from{opacity:0;transform:translateY(10px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.bubble{
+  max-width:70%;
+  padding:12px 16px;
+  border-radius:22px;
+  font-size:15px;
+  line-height:1.7;
+  transition:background .6s ease, color .6s ease;
+}
+
+.bot .bubble{
+  background:var(--bubble-bot);
+  border:1px solid #d8e2ff;
+}
+
+.user .bubble{
+  background:var(--bubble-user);
+  border:1px solid #b6c9ff;
+}
+
+/* INPUT */
+.input-area{
+  display:flex;
+  gap:8px;
+  padding:16px;
+}
+
+.input-area input{
+  flex:1;
+  border-radius:999px;
+  border:1px solid #cdd6ff;
+  padding:12px 18px;
+}
+
+.input-area button{
+  border-radius:999px;
+  border:1px solid #96b3ff;
+  background:#cddaff;
+  padding:0 20px;
+  cursor:pointer;
+}
+
+/* Typing */
+.typing{
+  display:flex;
+  gap:6px;
+}
+.typing span{
+  width:8px;
+  height:8px;
+  background:#9aa5d8;
+  border-radius:50%;
+  animation:blink 1.2s infinite both;
+}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+
+@keyframes blink{
+  0%{opacity:.3}
+  20%{opacity:1}
+  100%{opacity:.3}
+}
+
+/* Mascot */
+.mascot{
+  position:absolute;
+  right:-5px;
+  bottom:12px;
+  width:170px;
+  animation:float 4s ease-in-out infinite;
+  pointer-events:none;
+  z-index:999;
+}
+
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+  100%{transform:translateY(0)}
+}
+
+/* ── Resume Banner ── */
+.resume-overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(12px);
+  border-radius:24px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  z-index:200;
+  animation:fade .35s ease;
+}
+.resume-card{
+  background:white;
+  border-radius:22px;
+  padding:28px 32px;
+  box-shadow:0 20px 60px rgba(0,0,0,.12);
+  text-align:center;
+  max-width:340px;
+  width:90%;
+}
+.resume-card .icon{ font-size:36px; margin-bottom:8px; }
+.resume-card h2{
+  margin:0 0 6px;
+  font-size:17px;
+  font-weight:800;
+  color:#1b2a6b;
+}
+.resume-card .sub{
+  font-size:13px;
+  color:#888;
+  margin-bottom:14px;
+}
+.resume-card .progress-bar{
+  background:#eef2ff;
+  border-radius:999px;
+  height:8px;
+  overflow:hidden;
+  margin-bottom:6px;
+}
+.resume-card .progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#7da4ff,#4f79f6);
+  transition:width .6s ease;
+}
+.resume-card .progress-label{
+  font-size:12px;
+  color:#7da4ff;
+  font-weight:700;
+  margin-bottom:18px;
+}
+.resume-card .preview-text{
+  font-size:13px;
+  color:#555;
+  background:#f5f7ff;
+  border-left:3px solid #a0b4ff;
+  padding:10px 14px;
+  border-radius:0 10px 10px 0;
+  text-align:left;
+  margin-bottom:20px;
+  line-height:1.6;
+}
+.resume-btns{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.btn-resume{
+  padding:12px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:700;
+  background:linear-gradient(135deg,#7da4ff,#4f79f6);
+  color:white;
+  box-shadow:0 8px 20px rgba(79,121,246,.35);
+  transition:opacity .2s;
+}
+.btn-resume:hover{ opacity:.88; }
+.btn-new{
+  padding:11px;
+  border-radius:999px;
+  border:1.5px solid #d0d8f0;
+  cursor:pointer;
+  font-size:13px;
+  color:#666;
+  background:transparent;
+  transition:background .2s;
+}
+.btn-new:hover{ background:#f5f7ff; }
+
+.result-btn{
+  display:block;
+  margin:16px auto 0;
+  padding:12px 32px;
+  border-radius:999px;
+  border:none;
+  background:linear-gradient(135deg,#7da4ff,#4f79f6);
+  color:white;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(79,121,246,.35);
+  animation:pop .4s ease;
+  font-family:inherit;
+}
+.result-btn:hover{ opacity:.88; }
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">บทสนทนา <span>Recent</span></div>
+  <div class="sidebar-list" id="sidebarList">
+    <div class="sidebar-empty">⏳<br>ยังไม่มีบทสนทนา</div>
+  </div>
+  <div class="sidebar-new" onclick="startFreshConfirm()">+ เริ่มบทสนทนาใหม่</div>
+</div>
+
+<div class="app">
+
+<img class="mascot" src="/static/aqua-mascot.png">
+
+<div class="header">
+  <h1 id="title">พื้นที่พูดคุย</h1>
+
+  <div class="theme-btn" onclick="toggleTheme()">🎨 Theme</div>
+
+  <div id="themePanel" class="theme-panel">
+    <div class="theme-option" style="background:linear-gradient(135deg,#b9ccff,#ffffff)" onclick="setTheme('calm')"></div>
+    <div class="theme-option" style="background:linear-gradient(135deg,#ff9a9e,#fecfef)" onclick="setTheme('sunrise')"></div>
+    <div class="theme-option" style="background:linear-gradient(135deg,#89f7fe,#66a6ff)" onclick="setTheme('aqua')"></div>
+    <div class="theme-option" style="background:linear-gradient(135deg,#0f172a,#334155)" onclick="setTheme('dark')"></div>
+  </div>
+</div>
+
+<div id="chat" class="chat"></div>
+
+<div class="input-area">
+  <input id="msg" placeholder="พิมพ์ข้อความ…">
+  <button id="send">ส่ง</button>
+</div>
+
+</div>
+</div>
+
+<script>
+
+/* ======================= 🎨 THEME CONFIG ======================= */
+const THEMES = {
+
+  calm:{
+    bg:`linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,.9)),
+        url("https://i.pinimg.com/736x/93/af/c3/93afc3d107c0496207039fe35e692f47.jpg") center/cover no-repeat`,
+    header:`linear-gradient(135deg,#bed5ff,#e7f0ff,#ffffff)`,
+    bubbleBot:"#ffffff",
+    bubbleUser:`linear-gradient(135deg,#cfd9ff,#e7f0ff)`,
+    text:"#1b1b1b",
+    mascot:"/static/aqua-mascot.png",
+    themeBtn:"linear-gradient(135deg,#b9ccff,#ffffff)"
+  },
+
+  sunrise:{
+    bg:`linear-gradient(180deg,rgba(255,230,241,.45),rgba(255,247,251,.55)),
+        url("https://i.pinimg.com/736x/70/0d/b1/700db135b833757658dc737f964b4187.jpg") center/cover no-repeat`,
+    header:`linear-gradient(135deg,#ff9a9e,#fecfef,#ffffff)`,
+    bubbleBot:"#fff6fb",
+    bubbleUser:`linear-gradient(135deg,#ffb6c1,#ffd8e6)`,
+    text:"#522b3b",
+    mascot:"/static/bunny-mascot.png",
+    themeBtn:"linear-gradient(135deg,#ff9a9e,#fecfef)"
+  },
+
+  aqua:{
+    bg:`linear-gradient(180deg,rgba(218,245,255,.45),rgba(255,255,255,.55)),
+        url("https://i.pinimg.com/736x/0c/33/05/0c330553a7e7e61f42d4e6ea17e829b8.jpg") center/cover no-repeat`,
+    header:`linear-gradient(135deg,#89f7fe,#66a6ff,#ffffff)`,
+    bubbleBot:"#ffffff",
+    bubbleUser:`linear-gradient(135deg,#bfe8ff,#dff6ff)`,
+    text:"#0b1f3b",
+    mascot:"/static/shark-mascot.png",
+    themeBtn:"linear-gradient(135deg,#89f7fe,#66a6ff)"
+  },
+
+  dark:{
+    bg:`linear-gradient(180deg,rgba(10,12,28,.6),rgba(10,12,28,.75)),
+        url("https://i.pinimg.com/1200x/9b/de/c3/9bdec329fce404a6cfec1ddd7244b88c.jpg") center/cover`,
+    header:`linear-gradient(135deg,#0f172a,#1e293b,#334155)`,
+    bubbleBot:"#1f2937",
+    bubbleUser:`linear-gradient(135deg,#334155,#475569)`,
+    text:"#e5e7eb",
+    mascot:"/static/sleep-mascot.png",
+    themeBtn:"linear-gradient(135deg,#1f2937,#334155)"
+  }
+};
+
+/* ================= APPLY THEME ================= */
+function applyTheme(name){
+  const t = THEMES[name];
+  if(!t) return;
+
+  document.body.style.background = t.bg;
+  document.querySelector(".header").style.background = t.header;
+
+  document.documentElement.style.setProperty("--bubble-bot", t.bubbleBot);
+  document.documentElement.style.setProperty("--bubble-user", t.bubbleUser);
+
+  document.body.style.color = t.text;
+  document.querySelector(".header h1").style.color = t.text;
+
+  document.querySelector(".theme-btn").style.background = t.themeBtn;
+
+  const mascot=document.querySelector(".mascot");
+  if(mascot && t.mascot) mascot.src=t.mascot;
+
+  localStorage.setItem("CHAT_THEME", name);
+}
+
+/* =============== SELECT THEME PANEL =============== */
+function setTheme(name){
+  applyTheme(name);
+}
+
+function toggleTheme(){
+  const panel=document.getElementById("themePanel");
+  panel.style.display = panel.style.display==="block"?"none":"block";
+}
+
+/* ================= LOAD ================= */
+/* ================= CHAT ================= */
+const params=new URLSearchParams(window.location.search);
+const test=params.get("test")||"PHQ-9";
+
+window.onload = async ()=>{
+  const saved = localStorage.getItem("CHAT_THEME") || "calm";
+  applyTheme(saved);
+
+  // ตรวจว่ามี session เก่าไหม
+  // เริ่มใหม่เสมอ — session เก่าอยู่ใน sidebar ให้กดเองได้
+  await fetch("/assessment/reset",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({test})
+  });
+  startFresh();
+};
+
+function showResumeBanner(info){
+  // ถ้า score ครบแล้ว → เริ่มใหม่เลย ไม่ resume session ที่จบแล้ว
+  if(info.scored >= info.total && info.total > 0){
+    startFreshConfirm();
+    return;
+  }
+
+  const app = document.querySelector(".app");
+  const pct = Math.round((info.scored / info.total) * 100);
+
+  const overlay = document.createElement("div");
+  overlay.className = "resume-overlay";
+  overlay.id = "resumeBanner";
+  overlay.innerHTML = `
+    <div class="resume-card">
+      <div class="icon">💬</div>
+      <h2>มีบทสนทนาค้างอยู่</h2>
+      <p class="sub">ครั้งก่อนคุยค้างไว้นะครับ</p>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="progress-label">${info.scored} / ${info.total} ข้อ</div>
+      ${info.last_bot ? `<div class="preview-text">"${info.last_bot}"</div>` : ""}
+      <div class="resume-btns">
+        <button class="btn-resume" onclick="resumeSession()">💬 คุยต่อจากเดิม</button>
+        <button class="btn-new" onclick="startFreshConfirm()">เริ่มบทสนทนาใหม่</button>
+      </div>
+    </div>
+  `;
+  app.appendChild(overlay);
+}
+
+async function resumeSession(){
+  document.getElementById("resumeBanner")?.remove();
+  const chatEl = document.getElementById("chat");
+  chatEl.innerHTML = "";
+
+  const typingRow = addBubble("bot","",true);
+  try{
+    const res = await fetch(`/assessment/history?test=${encodeURIComponent(test)}`);
+    const data = await res.json();
+    typingRow.remove();
+
+    const history = data.history || [];
+    if(history.length > 0){
+      for(const msg of history){
+        addBubble(msg.role === "assistant" ? "bot" : "user", msg.content);
+      }
+      chatEl.scrollTop = chatEl.scrollHeight;
+    } else {
+      // ไม่มี history — เริ่มใหม่
+      startFresh();
+    }
+  } catch {
+    typingRow.remove();
+    startFresh();
+  }
+}
+
+async function startFreshConfirm(){
+  document.getElementById("resumeBanner")?.remove();
+  await fetch("/assessment/reset",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({test})
+  });
+  startFresh();
+}
+
+async function startFresh(){
+  const typingRow = addBubble("bot","",true);
+  try{
+    const res = await fetch("/assessment/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({test, userText:""})
+    });
+    const data = await res.json();
+    typingRow.remove();
+    if(data.reply) addBubble("bot", data.reply);
+  } catch {
+    typingRow.remove();
+    addBubble("bot","สวัสดีครับ 😊 วันนี้เป็นยังไงบ้างครับ?");
+  }
+}
+
+const chat=document.getElementById("chat");
+const input=document.getElementById("msg");
+const send=document.getElementById("send");
+
+function addBubble(role,text,typing=false){
+  const row=document.createElement("div");
+  row.className=`message-row ${role}`;
+
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+
+  if(typing){
+    bubble.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  }else bubble.innerText=text;
+
+  row.appendChild(bubble);
+  chat.appendChild(row);
+  chat.scrollTop=chat.scrollHeight;
+  return row;
+}
+
+async function sendMessage(){
+  if(!input.value.trim()) return;
+
+  const text=input.value;
+  addBubble("user",text);
+  input.value="";
+
+  const typingRow=addBubble("bot","",true);
+
+  try{
+    const res=await fetch("/assessment/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({test, userText:text})
+    });
+
+    if(!res.ok) throw new Error();
+    const data=await res.json();
+
+    typingRow.remove();
+    if(data.reply) addBubble("bot", data.reply);
+
+    if(data.done && data.redirect){
+      // แสดงปุ่มให้ user กดเองแทน auto redirect
+      setTimeout(()=>{
+        const btn = document.createElement("button");
+        btn.className = "result-btn";
+        btn.textContent = "📊 ดูผลการประเมิน";
+        btn.onclick = ()=>{ window.location.href = data.redirect; };
+        document.getElementById("chat").appendChild(btn);
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+        // disable input
+        document.getElementById("msg").disabled = true;
+        document.getElementById("send").disabled = true;
+      }, 1000);
+      return;
+    }
+  }
+  catch{
+    typingRow.remove();
+    addBubble("bot","ไม่เป็นไรนะ 😊 เราพร้อมฟังเสมอ");
+  }
+}
+
+send.onclick=sendMessage;
+
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* ================= SIDEBAR ================= */
+async function loadSidebar(){
+  try{
+    const res = await fetch(`/assessment/recent-sessions`);
+    const data = await res.json();
+    renderSidebar(data.sessions || []);
+  } catch { }
+}
+
+function renderSidebar(sessions){
+  const list = document.getElementById("sidebarList");
+  if(!sessions.length){
+    list.innerHTML = `<div class="sidebar-empty">⏳<br>ยังไม่มีบทสนทนา</div>`;
+    return;
+  }
+  list.innerHTML = sessions.map((s,i) => {
+    const badgeClass = s.done ? "badge done" : "badge";
+    const badgeText  = s.done ? "✓ เสร็จแล้ว" : `${s.scored}/${s.total}`;
+    const preview    = s.first_user || s.last_bot || "—";
+    const date       = s.updated_at ? s.updated_at.slice(0,16) : "";
+    const isActive   = (s.form === test && !s.done) ? "active" : "";
+    const skeyEsc    = encodeURIComponent(s.skey);
+    return `
+      <div class="session-item ${isActive}" onclick="switchSession('${skeyEsc}','${s.form}',${s.done})">
+        <div class="session-form">
+          <span>${s.form}</span>
+          <span class="${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="session-preview">${preview}</div>
+        <div class="session-date">${date}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function switchSession(skey, form, done){
+  // navigate ไป form นั้นพร้อม skey เพื่อ resume
+  if(form === test && !done){
+    // form เดิม ยังไม่ครบ → resume ทันที
+    resumeByKey(skey);
+  } else {
+    window.location.href = `/conversation?test=${form}${!done ? "&resume=1&skey="+encodeURIComponent(skey) : ""}`;
+  }
+}
+
+async function resumeByKey(skey){
+  const chatEl = document.getElementById("chat");
+  chatEl.innerHTML = "";
+  const typingRow = addBubble("bot","",true);
+  try{
+    // ดึง history จาก skey โดยตรง — ไม่ต้อง resume ก่อน
+    const res = await fetch(`/assessment/history?skey=${skey}`);
+    const data = await res.json();
+    typingRow.remove();
+    const history = data.history || [];
+    if(history.length > 0){
+      for(const msg of history){
+        addBubble(msg.role === "assistant" ? "bot" : "user", msg.content);
+      }
+      chatEl.scrollTop = chatEl.scrollHeight;
+      // โหลด session นี้เข้า active หลังจาก render แล้ว
+      await fetch("/assessment/resume",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({skey})
+      });
+    } else {
+      startFresh();
+    }
+  } catch {
+    typingRow.remove();
+    startFresh();
+  }
+}
+
+// โหลด sidebar ทุกครั้งที่เปิดหน้า
+loadSidebar();
+</script>
+
+</body>
+</html>

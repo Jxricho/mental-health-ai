@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แดชบอร์ดผู้เชี่ยวชาญ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#f3903f;--accent-2:#f57c00;
+  --bg:#f7f8fa;--white:#fff;
+  --text:#1b1b1b;--muted:#888;--border:#eee;
+  --low:#3dba7f;--mild:#f0c040;--medium:#f3903f;--high:#e05252;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Prompt",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.sidebar{position:fixed;left:0;top:0;width:220px;height:100vh;background:var(--white);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;gap:4px}
+.logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.logo h2{font-size:16px;font-weight:700;color:var(--accent-2)}
+.logo p{font-size:12px;color:var(--muted)}
+.nav-item{padding:10px 20px;cursor:pointer;font-size:14px;transition:background .15s;display:flex;align-items:center;gap:10px;color:var(--text)}
+.nav-item:hover{background:#fff7f0}
+.nav-item.active{background:#fff3e8;color:var(--accent-2);font-weight:600;border-right:3px solid var(--accent)}
+
+.main{margin-left:220px;padding:28px 32px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar h1{font-size:20px;font-weight:600}
+.topbar span{font-size:13px;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:var(--white);border-radius:14px;padding:18px 20px;border:1px solid var(--border)}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat-val{font-size:28px;font-weight:700;color:var(--accent-2)}
+
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.card-header input{padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:200px}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;font-size:12px;font-weight:600;color:var(--muted);text-align:left;background:#fafafa;border-bottom:1px solid var(--border)}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid #f5f5f5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fffaf6;cursor:pointer}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.LOW{background:#e8faf2;color:#0f6e56}
+.MILD{background:#fffbe6;color:#85600b}
+.MEDIUM{background:#fff3e8;color:#9a4d00}
+.MODERATE{background:#fff3e8;color:#9a4d00}
+.MODERATE_HIGH{background:#fde8e8;color:#a32d2d}
+.HIGH{background:#fde8e8;color:#a32d2d}
+
+.section{display:none}
+.section.active{display:block}
+
+.chat-viewer{max-height:420px;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:70%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6}
+.msg.bot{background:#f0f4ff;align-self:flex-start;border:1px solid #d8e2ff}
+.msg.user{background:#fff3e8;align-self:flex-end;border:1px solid #ffd6a8}
+.msg-time{font-size:10px;color:var(--muted);margin-top:3px}
+
+.back-btn{font-size:13px;color:var(--accent);cursor:pointer;margin-bottom:14px;display:inline-flex;align-items:center;gap:5px}
+.back-btn:hover{text-decoration:underline}
+
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{width:110px;font-size:13px;color:var(--muted);text-align:right}
+.bar-track{flex:1;background:#f0f0f0;border-radius:99px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .5s}
+.bar-count{font-size:12px;color:var(--muted);min-width:24px}
+
+/* item breakdown table */
+.breakdown-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f5}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-idx{width:24px;font-size:12px;color:var(--muted);flex-shrink:0;text-align:center}
+.breakdown-label{flex:1;font-size:13px;color:#333;line-height:1.4}
+.breakdown-track{width:80px;background:#f0f0f0;border-radius:99px;height:8px;overflow:hidden;flex-shrink:0}
+.breakdown-fill{height:100%;border-radius:99px}
+.breakdown-val{width:22px;font-size:13px;font-weight:700;text-align:right;flex-shrink:0}
+
+/* parent info */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 20px}
+.info-item label{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.info-item span{font-size:13px;color:var(--text)}
+
+.empty{padding:32px;text-align:center;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <h2>🧠 Expert Panel</h2>
+    <p>ระบบติดตามผู้ใช้</p>
+  </div>
+  <div class="nav-item active" onclick="showSection('overview')">📊 ภาพรวม</div>
+  <div class="nav-item" onclick="showSection('users')">👥 รายชื่อผู้ใช้</div>
+  <div class="nav-item" onclick="showSection('recent')">📋 ผลประเมินล่าสุด</div>
+  <div class="nav-item" onclick="showSection('loginlogs')">🔐 ประวัติ Login</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h1 id="section-title">ภาพรวม</h1>
+    <span id="last-updated"></span>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="sec-overview">
+    <div class="stats">
+      <div class="stat"><div class="stat-label">ผู้ใช้ทั้งหมด</div><div class="stat-val" id="ov-users">—</div></div>
+      <div class="stat"><div class="stat-label">การประเมินทั้งหมด</div><div class="stat-val" id="ov-assess">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">การกระจายระดับความรุนแรง</div>
+      <div style="padding:20px 24px" id="level-chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">ผลประเมินล่าสุด 10 รายการ</div>
+      <table><thead><tr><th>ผู้ใช้</th><th>แบบฟอร์ม</th><th>คะแนน</th><th>ระดับ</th><th>วันที่</th></tr></thead>
+      <tbody id="ov-recent"></tbody></table>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="section" id="sec-users">
+    <div class="card">
+      <div class="card-header">
+        รายชื่อผู้ใช้
+        <input type="text" id="user-search" placeholder="ค้นหาชื่อผู้ใช้..." oninput="filterUsers()">
+      </div>
+      <table><thead><tr><th>ชื่อผู้ใช้</th><th>อีเมล</th><th>สมัครเมื่อ</th><th>จำนวนประเมิน</th><th>ประเมินล่าสุด</th></tr></thead>
+      <tbody id="users-table"></tbody></table>
+    </div>
+  </div>
+
+  <!-- USER DETAIL -->
+  <div class="section" id="sec-user-detail">
+    <div class="back-btn" onclick="showSection('users')">← กลับ</div>
+
+    <!-- ข้อมูลผู้ปกครอง -->
+    <div class="card" id="parent-card" style="display:none;margin-bottom:16px">
+      <div class="card-header">👨‍👩‍👧 ข้อมูลผู้ปกครอง</div>
+      <div class="info-grid" id="parent-info"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" id="detail-header">ประวัติการประเมิน</div>
+      <table><thead><tr><th>แบบฟอร์ม</th><th>คะแนน</th><th>ระดับ</th><th>วันที่</th><th></th><th></th></tr></thead>
+      <tbody id="detail-table"></tbody></table>
+    </div>
+  </div>
+
+  <!-- CHAT VIEWER -->
+  <div class="section" id="sec-chat">
+    <div class="back-btn" id="chat-back">← กลับ</div>
+    <div class="card">
+      <div class="card-header" id="chat-header">บทสนทนา</div>
+      <div class="chat-viewer" id="chat-viewer"></div>
+    </div>
+  </div>
+
+  <!-- ITEM BREAKDOWN VIEWER -->
+  <div class="section" id="sec-breakdown">
+    <div class="back-btn" id="breakdown-back">← กลับ</div>
+    <div class="card">
+      <div class="card-header" id="breakdown-header">คะแนนรายข้อ</div>
+      <div style="padding:16px 20px" id="breakdown-content"></div>
+    </div>
+  </div>
+
+  <!-- RECENT ASSESSMENTS -->
+  <div class="section" id="sec-recent">
+    <div class="card">
+      <div class="card-header">ผลประเมินล่าสุด</div>
+      <table><thead><tr><th>ผู้ใช้</th><th>แบบฟอร์ม</th><th>คะแนน</th><th>ระดับ</th><th>วันที่</th></tr></thead>
+      <tbody id="recent-table"></tbody></table>
+    </div>
+  </div>
+
+  <!-- LOGIN LOGS -->
+  <div class="section" id="sec-loginlogs">
+    <div class="card">
+      <div class="card-header">ประวัติ Login</div>
+      <table><thead><tr><th>ผู้ใช้</th><th>IP</th><th>สถานะ</th><th>เวลา</th></tr></thead>
+      <tbody id="logs-table"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+let summaryData = {};
+let allUsers = [];
+let currentUser = "";
+
+const LEVEL_TH = {LOW:"เบา",MILD:"เล็กน้อย",MEDIUM:"ปานกลาง",MODERATE:"ปานกลาง",MODERATE_HIGH:"ค่อนข้างสูง",HIGH:"สูง"};
+const LEVEL_COLOR = {LOW:"#3dba7f",MILD:"#f0c040",MEDIUM:"#f3903f",MODERATE:"#f3903f",MODERATE_HIGH:"#e07030",HIGH:"#e05252"};
+
+// Item score bar color
+function barColor(ratio) {
+  if (ratio <= 0.33) return "#3dba7f";
+  if (ratio <= 0.66) return "#f0c040";
+  return "#e05252";
+}
+
+async function loadSummary() {
+  const res = await fetch("/api/dashboard/summary");
+  summaryData = await res.json();
+  allUsers = summaryData.users || [];
+
+  document.getElementById("ov-users").textContent = summaryData.total_users;
+  document.getElementById("ov-assess").textContent = summaryData.total_assessments;
+  document.getElementById("last-updated").textContent = "อัปเดต: " + new Date().toLocaleTimeString("th-TH");
+
+  const chart = document.getElementById("level-chart");
+  const levels = summaryData.level_counts || [];
+  const total = levels.reduce((s, l) => s + l.cnt, 0) || 1;
+  chart.innerHTML = levels.map(l => `
+    <div class="bar-row">
+      <div class="bar-label">${LEVEL_TH[l.level] || l.level}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(l.cnt/total*100)}%;background:${LEVEL_COLOR[l.level]||'#aaa'}"></div></div>
+      <div class="bar-count">${l.cnt}</div>
+    </div>`).join("") || '<div class="empty">ยังไม่มีข้อมูล</div>';
+
+  renderRecentTable("ov-recent", summaryData.recent_assessments || []);
+  renderRecentTable("recent-table", summaryData.recent_assessments || []);
+  renderUsersTable(allUsers);
+}
+
+function renderRecentTable(id, rows) {
+  document.getElementById(id).innerHTML = rows.length
+    ? rows.map(r => `<tr onclick="viewChat(${r.id||''},this)" data-id="${r.id}">
+        <td>${r.username}</td><td>${r.form}</td><td>${r.score}</td>
+        <td><span class="badge ${r.level}">${LEVEL_TH[r.level]||r.level}</span></td>
+        <td>${r.taken_at||""}</td></tr>`).join("")
+    : `<tr><td colspan="5" class="empty">ยังไม่มีข้อมูล</td></tr>`;
+}
+
+function renderUsersTable(rows) {
+  document.getElementById("users-table").innerHTML = rows.length
+    ? rows.map(u => `<tr onclick="viewUser('${u.username}')">
+        <td><b>${u.username}</b></td>
+        <td>${u.email||"—"}</td>
+        <td>${u.created_at||"—"}</td>
+        <td>${u.assessment_count||0}</td>
+        <td>${u.last_assessment||"ยังไม่เคยประเมิน"}</td></tr>`).join("")
+    : `<tr><td colspan="5" class="empty">ยังไม่มีผู้ใช้</td></tr>`;
+}
+
+function filterUsers() {
+  const q = document.getElementById("user-search").value.toLowerCase();
+  renderUsersTable(allUsers.filter(u => u.username.toLowerCase().includes(q) || (u.email||"").toLowerCase().includes(q)));
+}
+
+async function viewUser(username) {
+  currentUser = username;
+  showSection("user-detail");
+  document.getElementById("detail-header").textContent = "ประวัติการประเมิน — " + username;
+
+  const res = await fetch(`/api/dashboard/user/${username}`);
+  const data = await res.json();
+
+  // แสดงข้อมูลผู้ปกครอง
+  const info = data.user_info || {};
+  const parentCard = document.getElementById("parent-card");
+  if (info.parent_name || info.parent_phone) {
+    parentCard.style.display = "block";
+    document.getElementById("parent-info").innerHTML = `
+      <div class="info-item"><label>ชื่อผู้ปกครอง</label><span>${info.parent_name||"—"}</span></div>
+      <div class="info-item"><label>ความสัมพันธ์</label><span>${info.parent_relation||"—"}</span></div>
+      <div class="info-item"><label>เบอร์โทร</label><span>${info.parent_phone||"—"}</span></div>
+      <div class="info-item"><label>อีเมล</label><span>${info.email||"—"}</span></div>
+    `;
+  } else {
+    parentCard.style.display = "none";
+  }
+
+  const rows = data.assessments || [];
+  document.getElementById("detail-table").innerHTML = rows.length
+    ? rows.map(r => `<tr>
+        <td>${r.form}</td><td>${r.score}</td>
+        <td><span class="badge ${r.level}">${LEVEL_TH[r.level]||r.level}</span></td>
+        <td>${r.taken_at||""}</td>
+        <td><button onclick="viewItemBreakdown(${r.id},'${r.form}','${r.level}',${r.score})" style="font-size:12px;padding:4px 10px;border:1px solid #0096dc;border-radius:6px;background:none;color:#0096dc;cursor:pointer">📊 รายข้อ</button></td>
+        <td><button onclick="viewChat(${r.id}, this)" style="font-size:12px;padding:4px 10px;border:1px solid #f3903f;border-radius:6px;background:none;color:#f3903f;cursor:pointer">💬 บทสนทนา</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="6" class="empty">ยังไม่มีข้อมูล</td></tr>`;
+}
+
+// ======= ITEM BREAKDOWN =======
+const FORMS_QUESTIONS = {};  // cache
+
+async function viewItemBreakdown(assessmentId, form, level, score) {
+  showSection("breakdown");
+  document.getElementById("breakdown-back").onclick = () => showSection("user-detail");
+  document.getElementById("breakdown-header").textContent =
+    `คะแนนรายข้อ — ${form} · รวม ${score} คะแนน (${LEVEL_TH[level]||level})`;
+
+  // Fetch assessment detail
+  const res = await fetch(`/api/dashboard/chat/${assessmentId}`);
+  const data = await res.json();
+  const info = data.info || {};
+  let itemScores = {};
+  try { itemScores = JSON.parse(info.item_scores || "{}"); } catch {}
+
+  // Fetch form questions from result endpoint - use static mapping
+  const FORM_LABELS = {
+    "PHQ-9": ["เบื่อ ไม่สนใจอยากทำอะไร","ไม่สบายใจ ซึมเศร้า ท้อแท้","หลับยากหรือหลับๆตื่นๆหรือนอนมากไป","เหนื่อยง่ายหรือไม่ค่อยมีแรง","เบื่ออาหารหรือกินมากเกินไป","รู้สึกไม่ดีกับตัวเอง คิดว่าล้มเหลว","สมาธิไม่ดี","พูดช้าหรือกระสับกระส่าย","คิดทำร้ายตัวเองหรือคิดว่าตายไปคงจะดี"],
+    "BDI-II": ["ความเศร้า","การมองโลกในแง่ร้าย","ความล้มเหลวในอดีต","การสูญเสียความสุข","ความรู้สึกผิด","ความรู้สึกถูกลงโทษ","การไม่ชอบตัวเอง","การวิพากษ์วิจารณ์ตัวเอง","ความคิดฆ่าตัวตาย","การร้องไห้","ความกระวนกระวายใจ","การสูญเสียความสนใจ","ความไม่เด็ดขาด","ความไร้ค่า","การสูญเสียพลังงาน","การเปลี่ยนแปลงรูปแบบการนอนหลับ","ความหงุดหงิด","การเปลี่ยนแปลงความอยากอาหาร","ความยากลำบากในการมีสมาธิ","ความเหนื่อยล้าหรืออ่อนเพลีย","การสูญเสียความสนใจในเรื่องเพศ"],
+    "CES-D": ["กังวลกับสิ่งที่ปกติไม่รบกวน","ไม่อยากกินอาหาร","ไม่สามารถสลัดความเศร้าได้","รู้สึกมีคุณค่าเท่าคนอื่น","ลำบากในการมีสมาธิ","รู้สึกซึมเศร้า","ทุกอย่างต้องใช้ความพยายามมาก","รู้สึกมีความหวัง","รู้สึกชีวิตล้มเหลว","รู้สึกหวาดกลัว","นอนหลับไม่สนิท","รู้สึกมีความสุข","พูดน้อยกว่าปกติ","รู้สึกโดดเดี่ยว","รู้สึกผู้อื่นไม่เป็นมิตร","รู้สึกสนุกกับชีวิต","ร้องไห้บ่อย","รู้สึกเศร้า","รู้สึกผู้อื่นไม่ชอบ","ไม่สามารถเริ่มต้นทำสิ่งต่างๆ"],
+    "GDS-15": ["พึงพอใจกับชีวิต","ลดกิจกรรมที่เคยสนใจ","รู้สึกชีวิตว่างเปล่า","รู้สึกเบื่อบ่อย","มีอารมณ์ดีส่วนใหญ่","กลัวเรื่องร้าย","รู้สึกมีความสุขส่วนใหญ่","รู้สึกช่วยตัวเองไม่ได้","ชอบอยู่บ้านมากกว่าออกไป","คิดว่าความจำแย่กว่าคนอื่น","คิดว่าการมีชีวิตเป็นสิ่งดี","รู้สึกไม่มีคุณค่า","รู้สึกมีพลัง","รู้สึกสถานการณ์สิ้นหวัง","คิดว่าคนอื่นชีวิตดีกว่า"],
+    "HADS": ["รู้สึกตึงเครียดหรือกระวนกระวาย","ยังเพลิดเพลินกับสิ่งที่ชอบ","รู้สึกกลัวว่าจะมีเรื่องร้าย","หัวเราะและมองด้านขำขันได้","มีความคิดวิตกกังวลบ่อย","รู้สึกแจ่มใสเบิกบาน","ผ่อนคลายและสบายใจได้","ความคิดหรือการกระทำช้าลง","รู้สึกไม่สบายหรือปั่นป่วนในท้อง","ไม่ค่อยสนใจดูแลตัวเอง","รู้สึกกระสับกระส่าย","มองอนาคตด้วยความหวัง","มีความรู้สึกผวาอย่างฉับพลัน","เพลิดเพลินกับการอ่านหรือดูสื่อ"],
+    "Zung-SDS": ["รู้สึกซึมเศร้าและเศร้าใจ","ตอนเช้ารู้สึกดีที่สุด","รู้สึกอยากร้องไห้หรือร้องไห้บ่อย","นอนหลับไม่ดี","รับประทานอาหารได้เท่าเดิม","ยังเพลิดเพลินกับเรื่องเพศ","น้ำหนักลดลง","มีอาการท้องผูก","หัวใจเต้นเร็วกว่าปกติ","เหนื่อยโดยไม่มีเหตุผล","จิตใจปลอดโปร่งเหมือนเดิม","ทำสิ่งต่างๆ ได้ง่ายเหมือนเดิม","รู้สึกกระวนกระวาย","มีความหวังต่ออนาคต","หงุดหงิดง่ายกว่าปกติ","ตัดสินใจได้ง่ายเหมือนเดิม","รู้สึกมีคุณค่าและเป็นที่ต้องการ","ชีวิตมีความหมาย","เป็นประโยชน์ต่อผู้อื่น","พึงพอใจกับชีวิตโดยรวม"],
+    "HAM-D": ["อารมณ์ซึมเศร้า","ความรู้สึกผิดและตำหนิตนเอง","ความคิดอยากตาย","ปัญหานอนหลับ - เข้านอนยาก","ปัญหานอนหลับ - ตื่นบ่อย","ปัญหานอนหลับ - ตื่นเช้าเกินไป","ความสนใจในงาน/กิจกรรม","การชะลอตัว","ความกระสับกระส่าย","ความวิตกกังวลจิตใจ","ความวิตกกังวลร่างกาย","อาการทางเดินอาหาร","อาการทางกล้ามเนื้อ","ความต้องการทางเพศ","ความหมกมุ่นเรื่องสุขภาพ","การเปลี่ยนแปลงน้ำหนัก","การรับรู้ภาวะตนเอง"]
+  };
+
+  const questions = FORM_LABELS[form] || [];
+  const maxPerItem = form === "GDS-15" ? 1 : form === "Zung-SDS" ? 4 : 3;
+
+  const container = document.getElementById("breakdown-content");
+  if (questions.length === 0) {
+    container.innerHTML = '<div class="empty">ไม่มีข้อมูลรายข้อ</div>';
+    return;
+  }
+
+  container.innerHTML = questions.map((q, i) => {
+    const s = parseInt(itemScores[String(i)] ?? 0);
+    const ratio = s / maxPerItem;
+    const color = barColor(ratio);
+    return `<div class="breakdown-row">
+      <div class="breakdown-idx">${i+1}</div>
+      <div class="breakdown-label">${q}</div>
+      <div class="breakdown-track">
+        <div class="breakdown-fill" style="width:${Math.round(ratio*100)}%;background:${color}"></div>
+      </div>
+      <div class="breakdown-val" style="color:${color}">${s}</div>
+    </div>`;
+  }).join("");
+}
+
+function barColor(ratio) {
+  if (ratio <= 0.33) return "#3dba7f";
+  if (ratio <= 0.66) return "#f0c040";
+  return "#e05252";
+}
+
+async function viewChat(assessmentId, el) {
+  if (!assessmentId) return;
+  const fromDetail = document.getElementById("sec-user-detail").classList.contains("active");
+  document.getElementById("chat-back").onclick = () => showSection(fromDetail ? "user-detail" : "overview");
+
+  showSection("chat");
+  const res = await fetch(`/api/dashboard/chat/${assessmentId}`);
+  const data = await res.json();
+  const info = data.info || {};
+  document.getElementById("chat-header").textContent =
+    `บทสนทนา — ${info.username||""} · ${info.form||""} · คะแนน ${info.score||""} (${LEVEL_TH[info.level]||info.level||""})`;
+
+  const viewer = document.getElementById("chat-viewer");
+  const msgs = data.messages || [];
+  viewer.innerHTML = msgs.length
+    ? msgs.map(m => `
+        <div style="display:flex;flex-direction:column;align-items:${m.role==="user"?"flex-end":"flex-start"}">
+          <div class="msg ${m.role}">${m.content}</div>
+          <div class="msg-time">${m.sent_at||""}</div>
+        </div>`).join("")
+    : '<div class="empty">ไม่มีบทสนทนา</div>';
+  viewer.scrollTop = viewer.scrollHeight;
+}
+
+async function loadLoginLogs() {
+  const res = await fetch("/api/dashboard/login-logs");
+  const rows = await res.json();
+  document.getElementById("logs-table").innerHTML = rows.length
+    ? rows.map(r => `<tr>
+        <td>${r.username}</td>
+        <td>${r.ip||"—"}</td>
+        <td><span class="badge ${r.success?"LOW":"HIGH"}">${r.success?"สำเร็จ":"ล้มเหลว"}</span></td>
+        <td>${r.logged_at||""}</td></tr>`).join("")
+    : `<tr><td colspan="4" class="empty">ยังไม่มีข้อมูล</td></tr>`;
+}
+
+const SECTION_TITLES = {
+  overview:"ภาพรวม","user-detail":"ประวัติผู้ใช้",users:"รายชื่อผู้ใช้",
+  recent:"ผลประเมินล่าสุด",loginlogs:"ประวัติ Login",chat:"บทสนทนา",breakdown:"คะแนนรายข้อ"
+};
+
+function showSection(name) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  const map = {overview:0, users:1, recent:2, loginlogs:3};
+  if (map[name] !== undefined) document.querySelectorAll(".nav-item")[map[name]].classList.add("active");
+  document.getElementById("section-title").textContent = SECTION_TITLES[name] || "";
+  if (name === "loginlogs") loadLoginLogs();
+}
+
+loadSummary();
+setInterval(loadSummary, 5000);
+</script>
+</body>
+</html>

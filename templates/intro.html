@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🧠 สวัสดีครับ </title>
+<style>
+:root {
+  --accent: #f7bedf;
+  --accent-2: #f57c00;
+}
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(180deg, #fff7f2, #fdf2e3);
+  overflow: hidden;
+}
+.container {
+  text-align: center;
+  animation: fadeIn 1.2s ease;
+}
+h1 {
+  font-size: 64px;
+  color: var(--accent-2);
+  margin-bottom: 8px;
+  animation: floatIn 1.2s ease;
+}
+h2 {
+  font-size: 20px;
+  color: #444;
+  margin-bottom: 40px;
+  animation: fadeIn 2s ease;
+}
+button {
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  transition: all 0.3s ease;
+}
+button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+}
+.footer {
+  position: absolute;
+  bottom: 16px;
+  width: 100%;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>สวัสดีครับ 👋</h1>
+  <h2>ผมคือผู้ช่วยดูแลสุขภาพใจของคุณ<br>พร้อมรับฟังและให้คำแนะนำอย่างอ่อนโยน 🌿</h2>
+  <button onclick="window.location.href='/login'"> login </button>
+</div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🧠 แบบประเมินภาวะซึมเศร้า</title>
+
+<style>
+:root{
+  --accent:#f3903f;
+  --accent-2:#f57c00;
+}
+body{
+  font-family:"Segoe UI",Tahoma,sans-serif;
+  background:linear-gradient(180deg,#fff7f2,#f7f8fa);
+  margin:0;padding:28px;color:#222;
+}
+.container{max-width:1100px;margin:0 auto}
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:2px solid #f1f1f1;padding-bottom:12px;
+}
+.logo{
+  width:48px;height:48px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;margin-top:24px;
+}
+.card{
+  background:#fff;border-radius:14px;padding:18px;
+  box-shadow:0 8px 22px rgba(0,0,0,.06);
+}
+.card .start{
+  background:var(--accent);color:#fff;
+  padding:8px 12px;border:none;border-radius:8px;
+  cursor:pointer;font-weight:600;
+}
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  display:flex;justify-content:center;align-items:center;
+  z-index:50;
+}
+.modal{
+  background:#fff7f2;border-radius:12px;
+  padding:20px;max-width:640px;width:100%;
+  position:relative;
+}
+.close-btn{
+  position:absolute;top:10px;right:10px;
+  background:none;border:none;
+  font-size:20px;color:#f3903f;
+  cursor:pointer;
+}
+.chat-container{
+  background:#fff;border-radius:8px;
+  padding:10px;max-height:340px;overflow:auto;
+  margin-bottom:10px;
+}
+.chat-message{margin-bottom:8px}
+.chat-message.user{text-align:right}
+.bubble{
+  display:inline-block;padding:8px 12px;border-radius:14px;
+  max-width:75%;line-height:1.6;
+}
+.user .bubble{background:#f3903f;color:#fff}
+.bot .bubble{background:#f3f4f6}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div style="display:flex;gap:12px;align-items:center">
+    <div class="logo">MH</div>
+    <div>
+      <h2 style="margin:0">แบบประเมินภาวะซึมเศร้า</h2>
+      <div style="font-size:13px;color:#666">รูปแบบแชทบอท</div>
+    </div>
+  </div>
+
+  <!-- ===== MODEL TOGGLE ===== -->
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="modelBadge"
+      style="padding:4px 10px;border-radius:999px;
+             background:#e5f0ff;color:#1e3a8a;
+             font-size:12px;font-weight:600;">
+      ใช้ GPT
+    </span>
+
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+      <span style="font-size:12px">GPT</span>
+      <input type="checkbox" id="modelToggle" hidden>
+      <div id="toggleUI"
+        style="width:42px;height:22px;border-radius:999px;
+               background:#60a5fa;position:relative">
+        <div id="toggleDot"
+          style="width:18px;height:18px;background:#fff;
+                 border-radius:50%;position:absolute;top:2px;left:2px">
+        </div>
+      </div>
+      <span style="font-size:12px">Gemini</span>
+    </label>
+  </div>
+</div>
+
+<!-- ===== CARDS ===== -->
+<div class="grid" id="cardGrid"></div>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+// ===== GLOBAL MODEL =====
+let CURRENT_MODEL = localStorage.getItem("MODEL") || "gpt";
+const GPT_ONLY_FORMS = ["HAM-D","HADS"];
+
+const toggle=document.getElementById("modelToggle");
+const badge=document.getElementById("modelBadge");
+const dot=document.getElementById("toggleDot");
+
+toggle.checked = CURRENT_MODEL==="gemini";
+updateUI();
+
+toggle.onchange=()=>{
+  CURRENT_MODEL = toggle.checked?"gemini":"gpt";
+  localStorage.setItem("MODEL",CURRENT_MODEL);
+  updateUI();
+};
+
+function updateUI(){
+  if(CURRENT_MODEL==="gemini"){
+    badge.textContent="กำลังใช้ Gemini";
+    badge.style.background="#e9d5ff";
+    badge.style.color="#6b21a8";
+    dot.style.left="22px";
+  }else{
+    badge.textContent="กำลังใช้ GPT";
+    badge.style.background="#e5f0ff";
+    badge.style.color="#1e3a8a";
+    dot.style.left="2px";
+  }
+}
+
+// ===== ASSESSMENTS =====
+const assessments={
+  "PHQ-9":9,"BDI-II":21,"CES-D":20,
+  "HADS":14,"GDS-15":15,"Zung-SDS":20,"HAM-D":17
+};
+
+const grid=document.getElementById("cardGrid");
+Object.keys(assessments).forEach(k=>{
+  const c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=`
+    <h3>${k}</h3>
+    <p style="font-size:13px;color:#666">ทำแบบประเมินผ่านแชทบอท</p>
+    <button class="start">เริ่มทำ</button>`;
+  c.querySelector("button").onclick = () => {
+    window.location.href = `/conversation?test=${k}`;
+  }
+  grid.appendChild(c);
+});
+
+// // ===== CHAT MODAL =====
+// function openChat(test){
+//   let model = GPT_ONLY_FORMS.includes(test) ? "gpt" : CURRENT_MODEL;
+
+//   modalRoot.innerHTML=`
+//   <div class="modal-backdrop">
+//     <div class="modal">
+//       <button class="close-btn">✖</button>
+//       <h3>${test}</h3>
+
+//       <div class="chat-container" id="chat"></div>
+
+//       <div style="display:flex;gap:8px">
+//         <input id="msg" style="flex:1" placeholder="พิมพ์คำตอบของคุณ..." />
+//         <button class="start" id="sendBtn">ส่ง</button>
+//       </div>
+//     </div>
+//   </div>`;
+
+//   const chat = document.getElementById("chat");
+//   const input = document.getElementById("msg");
+//   const send = document.getElementById("sendBtn");
+//   const closeBtn = document.querySelector(".close-btn");
+//   const backdrop = document.querySelector(".modal-backdrop");
+
+//   closeBtn.onclick = () => modalRoot.innerHTML="";
+//   backdrop.onclick = e => { if(e.target===backdrop) modalRoot.innerHTML=""; };
+
+//   let step=0, answers=[];
+
+//   const add = (who,text)=>{
+//     const d=document.createElement("div");
+//     d.className="chat-message "+who;
+//     d.innerHTML=`<div class="bubble">${text}</div>`;
+//     chat.appendChild(d);
+//     chat.scrollTop=chat.scrollHeight;
+//   };
+
+//   add("bot","สวัสดีนะ😊 วันนี้เป็นยังไงบ้าง พอจะเล่าให้ฟังได้มั้ย");
+
+//   send.onclick = async ()=>{
+//     if(!input.value.trim()) return;
+
+//     add("user",input.value);
+//     const userText=input.value;
+//     input.value="";
+
+//     const res = await fetch("/assessment/chat",{
+//       method:"POST",
+//       headers:{"Content-Type":"application/json"},
+//       body:JSON.stringify({ test, step, answers, userText, model })
+//     });
+
+//     const data = await res.json();
+//     add("bot", data.reply);
+
+//     if(data.done){
+//       add("bot", data.reply);
+//       return;
+//     }
+
+//     step=data.step;
+//     answers=data.answers;
+//   };
+
+//   input.addEventListener("keydown",e=>{
+//     if(e.key==="Enter"){
+//       e.preventDefault();
+//       send.click();
+//     }
+//   });
+// }
+</script>
+</body>
+</html>

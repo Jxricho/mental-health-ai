@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #f3903f;
+  --accent-2: #f57c00;
+  --accent-light: #fff3e8;
+  --text: #1b1b1b;
+  --muted: #888;
+  --error: #e05252;
+  --success: #3dba7f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Prompt", "Segoe UI", sans-serif;
+  background: linear-gradient(160deg, #fff7f0 0%, #fdf2e3 60%, #fce8d5 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── floating blobs ── */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .35;
+  pointer-events: none;
+  animation: drift 12s ease-in-out infinite alternate;
+}
+.blob-1 { width: 380px; height: 380px; background: #f3903f; top: -120px; left: -100px; animation-delay: 0s; }
+.blob-2 { width: 260px; height: 260px; background: #ffcc80; bottom: -60px; right: -60px; animation-delay: -4s; }
+.blob-3 { width: 180px; height: 180px; background: #ffe0b2; top: 50%; left: 60%; animation-delay: -8s; }
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* ── card ── */
+.card {
+  position: relative;
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  padding: 44px 40px 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 30px 80px rgba(243,144,63,.18), 0 2px 0 rgba(255,255,255,.9) inset;
+  animation: slideUp .6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── logo ── */
+.logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.logo {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(243,144,63,.38);
+  font-size: 26px;
+}
+
+h2 {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+/* ── fields ── */
+.field { margin-bottom: 18px; position: relative; }
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.input-wrap { position: relative; }
+
+.input-wrap .icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  opacity: .5;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #fafafa;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+input:focus {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(243,144,63,.15);
+}
+input.error-input {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(224,82,82,.12);
+}
+
+/* toggle password */
+.toggle-pw {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; font-size: 16px;
+  opacity: .4; transition: opacity .2s;
+}
+.toggle-pw:hover { opacity: .8; }
+
+/* error msg */
+.err-msg {
+  font-size: 11px;
+  color: var(--error);
+  margin-top: 5px;
+  min-height: 16px;
+  display: block;
+}
+
+/* ── button ── */
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 8px 24px rgba(243,144,63,.35);
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(243,144,63,.42);
+}
+.btn-login:active {
+  transform: scale(.97);
+}
+.btn-login:disabled {
+  opacity: .6; cursor: not-allowed; transform: none;
+}
+.btn-login .spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── bottom link ── */
+.bottom {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.bottom a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.bottom a:hover { text-decoration: underline; }
+
+/* ── toast ── */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #222;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-family: inherit;
+  opacity: 0;
+  transition: all .35s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.success { background: var(--success); }
+.toast.fail    { background: var(--error); }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo">🧠</div>
+  </div>
+
+  <h2>ยินดีต้อนรับ</h2>
+  <p class="subtitle">เข้าสู่ระบบเพื่อเริ่มดูแลสุขภาพใจ</p>
+
+  <div class="field">
+    <label for="username">ชื่อผู้ใช้</label>
+    <div class="input-wrap">
+      <span class="icon">👤</span>
+      <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้" autocomplete="username">
+    </div>
+    <span class="err-msg" id="err-user"></span>
+  </div>
+
+  <div class="field">
+    <label for="password">รหัสผ่าน</label>
+    <div class="input-wrap">
+      <span class="icon">🔒</span>
+      <input type="password" id="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password">
+      <button class="toggle-pw" type="button" id="togglePw" aria-label="แสดง/ซ่อนรหัสผ่าน">👁️</button>
+    </div>
+    <span class="err-msg" id="err-pass"></span>
+  </div>
+
+  <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+    <span id="btn-text">เข้าสู่ระบบ</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="bottom">
+    ยังไม่มีบัญชี? <a href="/register">สมัครสมาชิก</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── toggle password visibility ──
+document.getElementById("togglePw").addEventListener("click", function() {
+  const pw = document.getElementById("password");
+  if (pw.type === "password") {
+    pw.type = "text";
+    this.textContent = "🙈";
+  } else {
+    pw.type = "password";
+    this.textContent = "👁️";
+  }
+});
+
+// ── clear errors on input ──
+document.getElementById("username").addEventListener("input", () => clearError("username"));
+document.getElementById("password").addEventListener("input", () => clearError("password"));
+
+// ── enter key ──
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") handleLogin();
+});
+
+function clearError(field) {
+  if (field === "username") {
+    document.getElementById("username").classList.remove("error-input");
+    document.getElementById("err-user").textContent = "";
+  } else {
+    document.getElementById("password").classList.remove("error-input");
+    document.getElementById("err-pass").textContent = "";
+  }
+}
+
+function showToast(msg, type = "fail") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type;
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+function setLoading(on) {
+  const btn = document.getElementById("loginBtn");
+  const txt = document.getElementById("btn-text");
+  const spin = document.getElementById("spinner");
+  btn.disabled = on;
+  txt.style.display = on ? "none" : "inline";
+  spin.style.display = on ? "block" : "none";
+}
+
+async function handleLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+
+  let valid = true;
+
+  // validation
+  if (!username) {
+    document.getElementById("username").classList.add("error-input");
+    document.getElementById("err-user").textContent = "กรุณากรอกชื่อผู้ใช้";
+    valid = false;
+  }
+  if (password.length < 4) {
+    document.getElementById("password").classList.add("error-input");
+    document.getElementById("err-pass").textContent = password.length === 0
+      ? "กรุณากรอกรหัสผ่าน"
+      : "รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร";
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (res.ok) {
+      showToast("เข้าสู่ระบบสำเร็จ 🎉", "success");
+      setTimeout(() => window.location.href = "/index", 1200);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", "fail");
+      document.getElementById("username").classList.add("error-input");
+      document.getElementById("password").classList.add("error-input");
+      setLoading(false);
+    }
+  } catch {
+    showToast("เชื่อมต่อไม่ได้ กรุณาลองใหม่อีกครั้ง", "fail");
+    setLoading(false);
+  }
+}
+</script>
+</body>
+</html>

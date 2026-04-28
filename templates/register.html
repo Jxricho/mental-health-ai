@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมัครสมาชิก</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #f3903f;
+  --accent-2: #f57c00;
+  --error: #e05252;
+  --success: #3dba7f;
+  --muted: #888;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Prompt", "Segoe UI", sans-serif;
+  background: linear-gradient(160deg, #fff7f0 0%, #fdf2e3 60%, #fce8d5 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .35;
+  pointer-events: none;
+  animation: drift 12s ease-in-out infinite alternate;
+}
+.blob-1 { width: 380px; height: 380px; background: #f3903f; top: -120px; right: -100px; animation-delay: 0s; }
+.blob-2 { width: 260px; height: 260px; background: #ffcc80; bottom: -60px; left: -60px; animation-delay: -4s; }
+.blob-3 { width: 180px; height: 180px; background: #ffe0b2; top: 40%; left: 10%; animation-delay: -8s; }
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px,20px) scale(1.08); }
+}
+.card {
+  position: relative;
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  padding: 44px 40px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 30px 80px rgba(243,144,63,.18), 0 2px 0 rgba(255,255,255,.9) inset;
+  animation: slideUp .6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.logo-wrap { display: flex; justify-content: center; margin-bottom: 24px; }
+.logo {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(243,144,63,.38);
+  font-size: 26px;
+}
+h2 { text-align: center; font-size: 22px; font-weight: 700; color: var(--accent-2); margin-bottom: 6px; }
+.subtitle { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+.field { margin-bottom: 14px; }
+label {
+  display: block;
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.input-wrap { position: relative; }
+.input-wrap .icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  pointer-events: none;
+  opacity: .45;
+}
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #fafafa;
+  color: #1b1b1b;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+input:focus {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(243,144,63,.15);
+}
+input.error-input {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(224,82,82,.12);
+}
+input.ok-input {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(61,186,127,.12);
+}
+.toggle-pw {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; font-size: 15px;
+  opacity: .4; transition: opacity .2s;
+}
+.toggle-pw:hover { opacity: .8; }
+.err-msg {
+  font-size: 11px;
+  color: var(--error);
+  margin-top: 4px;
+  min-height: 15px;
+  display: block;
+}
+
+/* password strength bar */
+.strength-wrap { margin-top: 6px; display: none; }
+.strength-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: #eee;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.strength-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0%;
+  transition: width .3s, background .3s;
+}
+.strength-label { font-size: 11px; color: var(--muted); }
+
+.btn-register {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 8px 24px rgba(243,144,63,.35);
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+  position: relative;
+}
+.btn-register:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(243,144,63,.42); }
+.btn-register:active { transform: scale(.97); }
+.btn-register:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.bottom { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
+.bottom a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.bottom a:hover { text-decoration: underline; }
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  padding: 12px 22px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #fff;
+  background: #222;
+  opacity: 0;
+  transition: all .35s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--success); }
+.toast.fail    { background: var(--error); }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="card">
+  <div class="logo-wrap"><div class="logo">🌿</div></div>
+  <h2>สมัครสมาชิก</h2>
+  <p class="subtitle">สร้างบัญชีเพื่อเริ่มต้นดูแลสุขภาพใจ</p>
+
+  <div class="field">
+    <label for="username">ชื่อผู้ใช้</label>
+    <div class="input-wrap">
+      <span class="icon">👤</span>
+      <input type="text" id="username" placeholder="ตั้งชื่อผู้ใช้" autocomplete="username">
+    </div>
+    <span class="err-msg" id="err-user"></span>
+  </div>
+
+  <div class="field">
+    <label for="email">อีเมล</label>
+    <div class="input-wrap">
+      <span class="icon">✉️</span>
+      <input type="email" id="email" placeholder="example@email.com" autocomplete="email">
+    </div>
+    <span class="err-msg" id="err-email"></span>
+  </div>
+
+  <div class="field">
+    <label for="password">รหัสผ่าน</label>
+    <div class="input-wrap">
+      <span class="icon">🔒</span>
+      <input type="password" id="password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
+      <button class="toggle-pw" type="button" id="togglePw1">👁️</button>
+    </div>
+    <div class="strength-wrap" id="strengthWrap">
+      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+      <span class="strength-label" id="strengthLabel">ความแข็งแรง: —</span>
+    </div>
+    <span class="err-msg" id="err-pass"></span>
+  </div>
+
+  <div class="field">
+    <label for="confirm">ยืนยันรหัสผ่าน</label>
+    <div class="input-wrap">
+      <span class="icon">🔒</span>
+      <input type="password" id="confirm" placeholder="พิมพ์รหัสผ่านอีกครั้ง" autocomplete="new-password">
+      <button class="toggle-pw" type="button" id="togglePw2">👁️</button>
+    </div>
+    <span class="err-msg" id="err-confirm"></span>
+  </div>
+
+
+  <!-- DIVIDER -->
+  <div style="margin:16px 0 10px;border-top:1px solid #f5e0cc;padding-top:14px">
+    <div style="font-size:12px;font-weight:600;color:#f57c00;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">👨‍👩‍👧 ข้อมูลผู้ปกครอง (ไม่บังคับ)</div>
+
+    <div class="field">
+      <label for="parent_name">ชื่อผู้ปกครอง</label>
+      <div class="input-wrap">
+        <span class="icon">👤</span>
+        <input type="text" id="parent_name" placeholder="ชื่อ-นามสกุลผู้ปกครอง">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="parent_relation">ความสัมพันธ์</label>
+      <div class="input-wrap">
+        <span class="icon">🔗</span>
+        <input type="text" id="parent_relation" placeholder="เช่น บิดา, มารดา, ผู้ปกครอง">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="parent_phone">เบอร์โทรผู้ปกครอง</label>
+      <div class="input-wrap">
+        <span class="icon">📞</span>
+        <input type="text" id="parent_phone" placeholder="0XX-XXX-XXXX">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-register" id="regBtn" onclick="handleRegister()">
+    <span id="btn-text">สมัครสมาชิก</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="bottom">มีบัญชีแล้ว? <a href="/login">เข้าสู่ระบบ</a></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── toggle password ──
+function makeToggle(btnId, inputId) {
+  document.getElementById(btnId).addEventListener("click", function() {
+    const el = document.getElementById(inputId);
+    el.type = el.type === "password" ? "text" : "password";
+    this.textContent = el.type === "password" ? "👁️" : "🙈";
+  });
+}
+makeToggle("togglePw1", "password");
+makeToggle("togglePw2", "confirm");
+
+// ── password strength ──
+document.getElementById("password").addEventListener("input", function() {
+  const val = this.value;
+  const wrap = document.getElementById("strengthWrap");
+  const fill = document.getElementById("strengthFill");
+  const label = document.getElementById("strengthLabel");
+
+  if (!val) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { pct: "20%", color: "#e05252", text: "อ่อนมาก" },
+    { pct: "40%", color: "#f3903f", text: "อ่อน" },
+    { pct: "60%", color: "#f0c040", text: "ปานกลาง" },
+    { pct: "80%", color: "#3dba7f", text: "แข็งแรง" },
+    { pct: "100%", color: "#1d9e75", text: "แข็งแรงมาก" },
+  ];
+  const l = levels[Math.min(score, 4)];
+  fill.style.width = l.pct;
+  fill.style.background = l.color;
+  label.textContent = "ความแข็งแรง: " + l.text;
+});
+
+// ── clear errors on input ──
+["username","email","password","confirm"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    document.getElementById(id).classList.remove("error-input","ok-input");
+    const errMap = {username:"err-user",email:"err-email",password:"err-pass",confirm:"err-confirm"};
+    document.getElementById(errMap[id]).textContent = "";
+  });
+});
+
+// ── enter key ──
+document.addEventListener("keydown", e => { if (e.key === "Enter") handleRegister(); });
+
+function setError(inputId, errId, msg) {
+  document.getElementById(inputId).classList.add("error-input");
+  document.getElementById(errId).textContent = msg;
+}
+function setOk(inputId) {
+  document.getElementById(inputId).classList.add("ok-input");
+}
+
+function showToast(msg, type = "fail") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type;
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+function setLoading(on) {
+  const btn = document.getElementById("regBtn");
+  document.getElementById("btn-text").style.display = on ? "none" : "inline";
+  document.getElementById("spinner").style.display  = on ? "block" : "none";
+  btn.disabled = on;
+}
+
+async function handleRegister() {
+  const username = document.getElementById("username").value.trim();
+  const email    = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirm  = document.getElementById("confirm").value;
+
+  let valid = true;
+
+  if (username.length < 3) {
+    setError("username", "err-user", "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร");
+    valid = false;
+  } else { setOk("username"); }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setError("email", "err-email", "รูปแบบอีเมลไม่ถูกต้อง");
+    valid = false;
+  } else { setOk("email"); }
+
+  if (password.length < 6) {
+    setError("password", "err-pass", "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+    valid = false;
+  } else { setOk("password"); }
+
+  if (confirm !== password) {
+    setError("confirm", "err-confirm", "รหัสผ่านไม่ตรงกัน");
+    valid = false;
+  } else if (confirm) { setOk("confirm"); }
+
+  if (!valid) return;
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username, email, password,
+        parent_name: document.getElementById("parent_name").value.trim(),
+        parent_relation: document.getElementById("parent_relation").value.trim(),
+        parent_phone: document.getElementById("parent_phone").value.trim()
+      })
+    });
+
+    if (res.ok) {
+      showToast("สมัครสมาชิกสำเร็จ! 🎉 กำลังพาไปหน้าเข้าสู่ระบบ", "success");
+      setTimeout(() => window.location.href = "/login", 2000);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.message || "ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่", "fail");
+      setLoading(false);
+    }
+  } catch {
+    showToast("เชื่อมต่อไม่ได้ กรุณาลองใหม่อีกครั้ง", "fail");
+    setLoading(false);
+  }
+}
+</script>
+</body>
+</html>
