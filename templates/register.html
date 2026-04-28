@@ -17,10 +17,9 @@
 body {
   font-family: "Prompt", "Segoe UI", sans-serif;
   background: linear-gradient(160deg, #fff7f0 0%, #fdf2e3 60%, #fce8d5 100%);
-  display: block;
+  display: flex;
   min-height: 100vh;
   justify-content: center;
-  align-items: center;
   overflow: auto;
   padding: 40px 20px;
 }
@@ -41,6 +40,7 @@ body {
 }
 .card {
   position: relative;
+  align-self: flex-start;
   background: rgba(255,255,255,.82);
   backdrop-filter: blur(18px);
   border-radius: 28px;
