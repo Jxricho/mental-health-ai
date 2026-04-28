@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from openai import OpenAI
 from dotenv import load_dotenv
+from pathlib import Path
 import os, json, sqlite3, bcrypt
 
 load_dotenv()
@@ -140,11 +141,16 @@ def clear_chat_session(key: str):
         conn.execute("UPDATE chat_sessions SET session_key=? WHERE session_key=?", (archived, key))
         conn.commit()
 
+# --- ส่วนของ AI และการตั้งค่าแอป ---
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("MY_SUPER_SECRET_KEY", "verysecret"), max_age=60*60*24*7)  # 7 วัน
+
+# *** จุดที่แก้: ใช้ str(BASE_DIR / "...") เพื่อระบุตำแหน่งที่แน่นอน ***
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+# ใช้ Secret Key จาก Env (ถ้าไม่มีจะใช้คำว่า verysecret แทน)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("MY_SUPER_SECRET_KEY", "verysecret"), max_age=60*60*24*7)
 
 # ======================================================
 # FORMS
