@@ -20,6 +20,7 @@ body {
   display: flex;
   min-height: 100vh;
   justify-content: center;
+  justify-content: center;
   overflow: auto;
   padding: 40px 20px;
 }
@@ -40,7 +41,8 @@ body {
 }
 .card {
   position: relative;
-  align-self: flex-start;
+  /* ลบ align-self: flex-start ออก */
+  
   background: rgba(255,255,255,.82);
   backdrop-filter: blur(18px);
   border-radius: 28px;
@@ -48,6 +50,9 @@ body {
   width: 100%;
   max-width: 420px;
   box-shadow: 0 30px 80px rgba(243,144,63,.18), 0 2px 0 rgba(255,255,255,.9) inset;
+  
+  margin: auto;          /* หัวใจสำคัญ! ช่วยดันให้กลางพอดีทั้งบนและล่าง */
+  
   animation: slideUp .6s cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes slideUp {
