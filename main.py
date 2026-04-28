@@ -436,11 +436,11 @@ async def root():
 
 @app.get("/intro")
 async def intro_page(request: Request):
-    return templates.TemplateResponse("intro.html", context={"request": request})
+    return templates.TemplateResponse(name="intro.html", request=request)
 
 @app.get("/login")
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", context={"request": request})
+    return templates.TemplateResponse(name="login.html", request=request)
 
 @app.post("/login")
 async def login(request: Request):
@@ -464,7 +464,7 @@ async def login(request: Request):
 
 @app.get("/register")
 async def register_page(request: Request):
-    return templates.TemplateResponse("register.html", context={"request": request})
+    return templates.TemplateResponse(name="register.html", request=request)
 
 @app.post("/register")
 async def register(request: Request):
@@ -495,19 +495,19 @@ async def register(request: Request):
 
 @app.get("/index")
 async def index_page(request: Request):
-    return templates.TemplateResponse("index.html", context={"request": request})
+    return templates.TemplateResponse(name="index.html", request=request)
 
 @app.get("/conversation")
 async def conversation_page(request: Request):
-    return templates.TemplateResponse("conversation.html", context={"request": request})
+    return templates.TemplateResponse(name="conversation.html", request=request)
 
 @app.get("/post-analysis")
 async def post_analysis_page(request: Request):
-    return templates.TemplateResponse("post_analysis.html", context={"request": request})
+    return templates.TemplateResponse(name="post-analysis.html", request=request)
 
 @app.get("/dashboard")
 async def dashboard_page(request: Request):
-    return templates.TemplateResponse("dashboard.html", context={"request": request})
+    return templates.TemplateResponse(name="dashboard.html", request=request)
 
 
 # ======================================================
